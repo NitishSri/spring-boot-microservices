@@ -1,0 +1,102 @@
+version: '3'
+services:
+   
+   rabbitmq:
+    image: rabbitmq:3.5.3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    networks:
+      - my-network
+      
+   zipkin-server:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    environment:
+      STORAGE_TYPE: mem
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "9411:9411"
+    restart: always
+    depends_on:
+      - rabbitmq
+    networks:
+      - my-network
+   
+   eurekaserver:
+      #build:
+      #context: EurekaServer
+      #dockerfile: Dockerfile
+      image: eurekaserver:version1
+      ports:
+      - 8761:8761
+      networks:
+      - my-network
+      restart: always
+      
+   mysqldb:
+      image: mysql:latest
+      volumes:
+      - mysql-database-data-volume:/var/lib/mysql
+      restart: always
+      ports:
+      - 3306:3306
+      environment:
+         MYSQL_ROOT_PASSWORD: Welcome1
+         MYSQL_USER: root
+         MYSQL_PASSWORD: Welcome1
+         MYSQL_DATABASE: root
+      networks:
+      - my-network
+      
+   loginservice:
+      image: loginservice:version1
+      #build:
+      #context: LoginService
+      #dockerfile: Dockerfile
+      restart: always
+      environment:
+         EUREKA_HOST: eurekaserver
+         EUREKA_PORT: 8761
+         RDS_HOSTNAME: mysqldb
+         RDS_PORT: 3306
+         RDS_DB_NAME: root
+         RDS_USERNAME: root
+         RDS_PASSWORD: Welcome1
+      ports:
+      - 8060:8060
+      networks:
+      - my-network
+      depends_on:
+      - eurekaserver
+      - mysqldb
+      
+   registerservice:
+      image: registerservice:version1
+      #build:
+      #context: RegisterationService
+      #dockerfile: Dockerfile
+      restart: always
+      environment:
+         EUREKA_HOST: eurekaserver
+         EUREKA_PORT: 8761
+         RDS_HOSTNAME: mysqldb
+         RDS_PORT: 3306
+         RDS_DB_NAME: root
+         RDS_USERNAME: root
+         RDS_PASSWORD: Welcome1
+         login.service.name: login-service
+         api.gateway.url: dummy
+      ports:
+      - 8061:8061
+      networks:
+      - my-network
+      depends_on:
+      - eurekaserver
+      - mysqldb
+volumes:
+   mysql-database-data-volume:
+networks:
+   my-network:
+      driver: bridge

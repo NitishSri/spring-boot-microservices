@@ -1,0 +1,36 @@
+version: '3'
+services:
+   comparer_app:
+      image: dockerapp:version1
+      ports:
+      - 8069:8069
+      environment:
+         RDS_HOSTNAME: mysqldb
+         RDS_PORT: 3306
+         RDS_DB_NAME: root
+         RDS_USERNAME: root
+         RDS_PASSWORD: Welcome1
+      networks:
+      - comparer-network
+      depends_on:
+      - mysqldb
+      restart: always
+   mysqldb:
+      image: mysql:latest
+      volumes:
+      - mysql-database-data-volume:/var/lib/mysql
+      restart: always
+      ports:
+      - 3306:3306
+      environment:
+         MYSQL_ROOT_PASSWORD: Welcome1
+         MYSQL_USER: root
+         MYSQL_PASSWORD: Welcome1
+         MYSQL_DATABASE: root
+      networks:
+      - comparer-network
+volumes:
+   mysql-database-data-volume: null
+networks:
+   comparer-network:
+      driver: bridge
