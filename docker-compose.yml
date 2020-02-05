@@ -71,6 +71,8 @@ services:
       depends_on:
       - eurekaserver
       - mysqldb
+      - rabbitmq
+      - zipkin-server
       
    registerservice:
       image: registerservice:version1
@@ -95,6 +97,30 @@ services:
       depends_on:
       - eurekaserver
       - mysqldb
+      - rabbitmq
+      - zipkin-server
+      
+      
+   zuulservice:
+      image: zuulservice:version1
+      #build:
+      #context: LoginService
+      #dockerfile: Dockerfile
+      restart: always
+      environment:
+         EUREKA_HOST: eurekaserver
+         EUREKA_PORT: 8761
+         ZUUL_PORT: 8068
+        
+      ports:
+      - 8068:8068
+      networks:
+      - my-network
+      depends_on:
+      - eurekaserver
+      - rabbitmq
+      - zipkin-server
+   
 volumes:
    mysql-database-data-volume:
 networks:
