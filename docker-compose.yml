@@ -25,10 +25,10 @@ services:
       - my-network
    
    eurekaserver:
-      #build:
-      #context: EurekaServer
-      #dockerfile: Dockerfile
-      image: eurekaserver:version1
+      #image: eurekaserver:version1
+      build:
+         context: EurekaServer
+         dockerfile: Dockerfile
       ports:
       - 8761:8761
       networks:
@@ -51,10 +51,10 @@ services:
       - my-network
       
    loginservice:
-      image: loginservice:version1
-      #build:
-      #context: LoginService
-      #dockerfile: Dockerfile
+      #image: loginservice:version1
+      build:
+         context: LoginService
+         dockerfile: Dockerfile
       restart: always
       environment:
          EUREKA_HOST: eurekaserver
@@ -64,21 +64,24 @@ services:
          RDS_DB_NAME: root
          RDS_USERNAME: root
          RDS_PASSWORD: Welcome1
+         SPRINGCLOUD_HOST: springcloud
+         SPRINGCLOUD_PORT: 8089
       ports:
       - 8060:8060
       networks:
       - my-network
       depends_on:
       - eurekaserver
+      - springcloud
       - mysqldb
       - rabbitmq
-      - zipkin-server
+      - zipkin-server     
       
    registerservice:
-      image: registerservice:version1
-      #build:
-      #context: RegisterationService
-      #dockerfile: Dockerfile
+      #image: registerservice:version1
+      build:
+         context: RegisterationService
+         dockerfile: Dockerfile
       restart: always
       environment:
          EUREKA_HOST: eurekaserver
@@ -88,6 +91,8 @@ services:
          RDS_DB_NAME: root
          RDS_USERNAME: root
          RDS_PASSWORD: Welcome1
+         SPRINGCLOUD_HOST: springcloud
+         SPRINGCLOUD_PORT: 8089
          login.service.name: login-service
          api.gateway.url: dummy
       ports:
@@ -96,24 +101,43 @@ services:
       - my-network
       depends_on:
       - eurekaserver
+      - springcloud
       - mysqldb
       - rabbitmq
       - zipkin-server
       
       
    zuulservice:
-      image: zuulservice:version1
-      #build:
-      #context: LoginService
-      #dockerfile: Dockerfile
+      #image: zuulservice:version1
+      build:
+         context: zuul-api-gateway
+         dockerfile: Dockerfile
       restart: always
       environment:
          EUREKA_HOST: eurekaserver
          EUREKA_PORT: 8761
-         ZUUL_PORT: 8068
-        
+         ZUUL_PORT: 8068     
       ports:
       - 8068:8068
+      networks:
+      - my-network
+      depends_on:
+      - eurekaserver
+      - rabbitmq
+      - zipkin-server
+      
+   springcloud:
+      #image: springcloud:version1
+      build:
+         context: spring-cloud-config-server
+         dockerfile: Dockerfile
+      restart: always
+      environment:
+         EUREKA_HOST: eurekaserver
+         EUREKA_PORT: 8761
+         ZUUL_PORT: 8068      
+      ports:
+      - 8089:8089
       networks:
       - my-network
       depends_on:
