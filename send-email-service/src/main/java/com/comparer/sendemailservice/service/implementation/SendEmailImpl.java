@@ -19,7 +19,7 @@ public class SendEmailImpl implements SendEmail {
 		MailjetClient client;
 		MailjetRequest request;
 		MailjetResponse response;
-		client = new MailjetClient("5824a2a68b17da97c5c4bdb7befb1999", "04b2b77ec86a5fb444c997261196822d");
+		client = new MailjetClient("", "");
 		client.setDebug(MailjetClient.VERBOSE_DEBUG);
 		request = new MailjetRequest(Emailv31.resource).property(Emailv31.MESSAGES,
 				new JSONArray().put(new JSONObject().put(Emailv31.Message.SENDER, content.getFromEmail())
