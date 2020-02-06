@@ -3,6 +3,7 @@ package com.example.LoginService;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.model.LoginCredentials;
+import com.example.properties.RabbitMQProperties;
+import com.example.resourceobject.ForgotPasswordRO;
 import com.example.resourceobject.SuccessReport;
 import com.example.service.DataService;
 
@@ -18,6 +21,12 @@ import com.example.service.DataService;
 public class LoginController {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	@Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    RabbitMQProperties rabbitMQProperties;
 
 	@Autowired
 	private DataService dataService;
@@ -83,5 +92,12 @@ public class LoginController {
 	public final ResponseEntity<Exception> handleAllExceptions(RuntimeException ex) {
 		return new ResponseEntity<Exception>(ex, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	@GetMapping("/forgotpassword")
+	public void sendMessage(String email){
+        ForgotPasswordRO passRO = new ForgotPasswordRO();
+        passRO.setEmail(email);
+        rabbitTemplate.convertAndSend(rabbitMQProperties.getExchangeName(), rabbitMQProperties.getRoutingKey(), passRO);
+    }
 
 }
