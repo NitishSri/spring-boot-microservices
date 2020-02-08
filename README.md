@@ -1,6 +1,6 @@
 # SpringApplication
 
-This is Spring Boot microservice based Login and Registration application. The functionality of forgot password send email with queue in between.
+This is a Spring Boot microservice based Login and Registration application. The functionality of forgot password send email with queue in between.
 If email send application is down, all emails will be preserved in queue (rabbit mq used). Once the application is up, mails will be send
 by a third party mailjet.
 
