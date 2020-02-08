@@ -5,7 +5,11 @@ This is a Spring Boot microservice based Login and Registration application. The
 Technology Stack Used :
 
 Spring Boot (Login , Registration , Send Email microservice)
+Eureka Server
 Spring Cloud Config Server
+JUnit , Mockito
+Swagger
+Hystrix
 MySQL db (As relation database)
 Feign (To call one microservice to another)
 Zuul APi Gateway
