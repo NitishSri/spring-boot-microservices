@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.RegisterationService.model.RegisterationUserInfo;
+import com.example.RegisterationService.proxy.LoginServiceProxyClient;
 import com.example.RegisterationService.repository.RegistrationRepository;
 import com.example.RegisterationService.resourceobject.SuccessReport;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -25,6 +26,9 @@ public class RegistrationController {
 
 	@Autowired
 	RestTemplate restTemplate;
+
+	@Autowired
+	LoginServiceProxyClient loginProxy;
 
 	@Value("${login.service.name}")
 	private String loginServiceName;
@@ -40,32 +44,36 @@ public class RegistrationController {
 	}
 
 	@GetMapping("/register")
-	@HystrixCommand
 	public String registerUser(String username, String firstname, String lastname, String password) {
 		logger.info("register user api called");
 		if (!validateInput(username, password)) {
 			return "Fields cannot be left blank !!";
 		}
-		final String checkUserUri = "http://" + loginServiceName + "/checkUserExist";
-		// final String checkUserUri = apiGatewayURL +"/"+ loginServiceName +
-		// "/checkUserExist";
+		
+		/**
+		 *  Using RestTemplate making a call to another microservice
+			final String checkUserUri = "http://" + loginServiceName + "/checkUserExist";
+			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(checkUserUri).queryParam("username",username);
+			String apiUrl = builder.toUriString();
+			SuccessReport responseEntity = restTemplate.getForObject(apiUrl, SuccessReport.class);
+		**/
+		
+		
+		SuccessReport responseEntity = loginProxy.checkUserExist(username);
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(checkUserUri).queryParam("username",
-				username);
-		String apiUrl = builder.toUriString();
-
-		SuccessReport responseEntity = restTemplate.getForObject(apiUrl, SuccessReport.class);
 		if (null != responseEntity && "USEREXIST".equals(responseEntity.getStatusCode())) {
 			return responseEntity.getStatusMessage();
 		}
 
-		// Add Login User Cred
-		final String addUserUri = "http://" + loginServiceName + "/addUser";
-		// final String addUserUri = apiGatewayURL +"/"+ loginServiceName + "/addUser";
-		UriComponentsBuilder addUserbuilder = UriComponentsBuilder.fromUriString(addUserUri)
-				.queryParam("username", username).queryParam("password", password);
-		String addUserUrl = addUserbuilder.toUriString();
-		SuccessReport addUserEntity = restTemplate.getForObject(addUserUrl, SuccessReport.class);
+		/**
+		 *  Using RestTemplate making a call to another microservice
+			final String addUserUri = "http://" + loginServiceName + "/addUser";
+			UriComponentsBuilder addUserbuilder = UriComponentsBuilder.fromUriString(addUserUri).queryParam("username", username).queryParam("password", password);
+			String addUserUrl = addUserbuilder.toUriString();
+		**/
+		
+		
+		SuccessReport addUserEntity = loginProxy.addUser(username, password);
 		if (null != addUserEntity && "USERNOTADDED".equals(addUserEntity.getStatusCode())) {
 			return addUserEntity.getStatusMessage();
 		}

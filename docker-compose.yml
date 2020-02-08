@@ -145,6 +145,24 @@ services:
       - rabbitmq
       - zipkin-server
    
+   emailservice:
+      #image: zuulservice:version1
+      build:
+         context: send-email-service
+         dockerfile: Dockerfile
+      restart: always
+      environment:
+         EUREKA_HOST: eurekaserver
+         EUREKA_PORT: 8761
+      ports:
+      - 8067:8067
+      networks:
+      - my-network
+      depends_on:
+      - eurekaserver
+      - springcloud
+      - rabbitmq
+      
 volumes:
    mysql-database-data-volume:
 networks:
