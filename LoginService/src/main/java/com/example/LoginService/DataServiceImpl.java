@@ -2,29 +2,28 @@ package com.example.LoginService;
 
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.model.LoginCredentials;
 import com.example.repository.LoginRepository;
+import com.example.resourceobject.LoginResponseRO;
 import com.example.service.DataService;
 
 @Service
-public class DataServiceImpl implements DataService {
+public class DataServiceImpl implements DataService   {
 
 	@Autowired
 	private LoginRepository loginRepository;
 
 	@Override
-	public boolean checkUserExist(String username, String password) {
+	public LoginResponseRO checkUserExist(String username) {
 		Optional<LoginCredentials> credList = loginRepository.findByUsername(username);
-		if (credList.isPresent() && credList.get().getUsername().equalsIgnoreCase(username)
-				&& credList.get().getPassword().equalsIgnoreCase(password)) {
-			return true;
-		} else {
-			return false;
+		if (credList.isPresent()) {
+			return new ModelMapper().map(credList.get(), LoginResponseRO.class);
 		}
-
+		return null;
 	}
 
 	@Override

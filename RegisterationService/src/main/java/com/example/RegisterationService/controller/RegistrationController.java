@@ -1,6 +1,9 @@
 package com.example.RegisterationService.controller;
 
+import java.util.Optional;
+
 import org.apache.logging.log4j.util.Strings;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import com.example.RegisterationService.model.RegisterationUserInfo;
 import com.example.RegisterationService.proxy.LoginServiceProxyClient;
 import com.example.RegisterationService.repository.RegistrationRepository;
 import com.example.RegisterationService.resourceobject.SuccessReport;
+import com.example.RegisterationService.resourceobject.UserDetailsRO;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @RestController
@@ -49,16 +53,16 @@ public class RegistrationController {
 		if (!validateInput(username, password)) {
 			return "Fields cannot be left blank !!";
 		}
-		
+
 		/**
-		 *  Using RestTemplate making a call to another microservice
-			final String checkUserUri = "http://" + loginServiceName + "/checkUserExist";
-			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(checkUserUri).queryParam("username",username);
-			String apiUrl = builder.toUriString();
-			SuccessReport responseEntity = restTemplate.getForObject(apiUrl, SuccessReport.class);
-		**/
-		
-		
+		 * Using RestTemplate making a call to another microservice final String
+		 * checkUserUri = "http://" + loginServiceName + "/checkUserExist";
+		 * UriComponentsBuilder builder =
+		 * UriComponentsBuilder.fromUriString(checkUserUri).queryParam("username",username);
+		 * String apiUrl = builder.toUriString(); SuccessReport responseEntity =
+		 * restTemplate.getForObject(apiUrl, SuccessReport.class);
+		 **/
+
 		SuccessReport responseEntity = loginProxy.checkUserExist(username);
 
 		if (null != responseEntity && "USEREXIST".equals(responseEntity.getStatusCode())) {
@@ -66,13 +70,14 @@ public class RegistrationController {
 		}
 
 		/**
-		 *  Using RestTemplate making a call to another microservice
-			final String addUserUri = "http://" + loginServiceName + "/addUser";
-			UriComponentsBuilder addUserbuilder = UriComponentsBuilder.fromUriString(addUserUri).queryParam("username", username).queryParam("password", password);
-			String addUserUrl = addUserbuilder.toUriString();
-		**/
-		
-		
+		 * Using RestTemplate making a call to another microservice final String
+		 * addUserUri = "http://" + loginServiceName + "/addUser"; UriComponentsBuilder
+		 * addUserbuilder =
+		 * UriComponentsBuilder.fromUriString(addUserUri).queryParam("username",
+		 * username).queryParam("password", password); String addUserUrl =
+		 * addUserbuilder.toUriString();
+		 **/
+
 		SuccessReport addUserEntity = loginProxy.addUser(username, password);
 		if (null != addUserEntity && "USERNOTADDED".equals(addUserEntity.getStatusCode())) {
 			return addUserEntity.getStatusMessage();
@@ -119,6 +124,17 @@ public class RegistrationController {
 	public String fallBackLoginService() {
 		logger.info("fallback method called");
 		return "Login Service is Under Maintenance";
+	}
+
+	@GetMapping("/getUserDetails")
+	public UserDetailsRO getUserDetails(String username) {
+		Optional<RegisterationUserInfo> user = registrationRepository.findByUsername(username);
+		if (user.isPresent()) {
+			return new ModelMapper().map(user.get(), UserDetailsRO.class);
+		} else {
+			return null;
+		}
+
 	}
 
 }
