@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 
 import com.comparer.zuulapigateway.filters.ErrorFilter;
@@ -15,6 +16,7 @@ import brave.sampler.Sampler;
 @EnableZuulProxy
 @EnableEurekaClient
 @SpringBootApplication
+@EnableFeignClients
 public class ZuulApiGatewayApplication {
 
 	public static void main(String[] args) {
@@ -40,6 +42,5 @@ public class ZuulApiGatewayApplication {
 	public Sampler defaultSampler() {
 		return Sampler.ALWAYS_SAMPLE;
 	}
-
-
+	
 }

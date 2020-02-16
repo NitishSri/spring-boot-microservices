@@ -2,14 +2,19 @@ package com.example.RegisterationService.controller;
 
 import java.util.Optional;
 
-import org.apache.logging.log4j.util.Strings;
+import javax.validation.Valid;
+
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,8 +22,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.example.RegisterationService.model.RegisterationUserInfo;
 import com.example.RegisterationService.proxy.LoginServiceProxyClient;
 import com.example.RegisterationService.repository.RegistrationRepository;
+import com.example.RegisterationService.resourceobject.RegisterationUserRequestRO;
+import com.example.RegisterationService.resourceobject.RegisterationUserResponseRO;
 import com.example.RegisterationService.resourceobject.SuccessReport;
 import com.example.RegisterationService.resourceobject.UserDetailsRO;
+import com.example.RegisterationService.service.UserRegistrationService;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @RestController
@@ -30,6 +38,9 @@ public class RegistrationController {
 
 	@Autowired
 	RestTemplate restTemplate;
+
+	@Autowired
+	UserRegistrationService service;
 
 	@Autowired
 	LoginServiceProxyClient loginProxy;
@@ -47,12 +58,9 @@ public class RegistrationController {
 		this.registrationRepository = registrationRepository;
 	}
 
-	@GetMapping("/register")
-	public String registerUser(String username, String firstname, String lastname, String password) {
+	@PostMapping(path = "/register", consumes = "application/json", produces = "application/json")
+	public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterationUserRequestRO registerUserRO) {
 		logger.info("register user api called");
-		if (!validateInput(username, password)) {
-			return "Fields cannot be left blank !!";
-		}
 
 		/**
 		 * Using RestTemplate making a call to another microservice final String
@@ -63,10 +71,8 @@ public class RegistrationController {
 		 * restTemplate.getForObject(apiUrl, SuccessReport.class);
 		 **/
 
-		SuccessReport responseEntity = loginProxy.checkUserExist(username);
-
-		if (null != responseEntity && "USEREXIST".equals(responseEntity.getStatusCode())) {
-			return responseEntity.getStatusMessage();
+		if (service.checkUsernameTaken(registerUserRO.getUsername())) {
+			return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("User already exist in our system.");
 		}
 
 		/**
@@ -78,21 +84,25 @@ public class RegistrationController {
 		 * addUserbuilder.toUriString();
 		 **/
 
-		SuccessReport addUserEntity = loginProxy.addUser(username, password);
+		SuccessReport addUserEntity = loginProxy.addUser(registerUserRO.getUsername(), registerUserRO.getPassword());
 		if (null != addUserEntity && "USERNOTADDED".equals(addUserEntity.getStatusCode())) {
-			return addUserEntity.getStatusMessage();
+			return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(addUserEntity.getStatusMessage());
 		}
 
-		RegisterationUserInfo userInfo = new RegisterationUserInfo();
-		userInfo.setFirstname(firstname);
-		userInfo.setLastname(lastname);
-		userInfo.setUsername(username);
-		RegisterationUserInfo registeredUser = registrationRepository.save(userInfo);
+		RegisterationUserRequestRO user = new RegisterationUserRequestRO();
+		user.setFirstname(registerUserRO.getFirstname());
+		user.setLastname(registerUserRO.getLastname());
+		user.setUsername(registerUserRO.getUsername());
 
+		RegisterationUserResponseRO registeredUser = service.saveUser(user);
+		String message = org.apache.commons.lang.StringUtils.EMPTY;
 		if (null != registeredUser) {
-			return userInfo.getFirstname() + " " + userInfo.getLastname() + " has been registered successfully !!";
+			message = registeredUser.getFirstname() + " " + registeredUser.getLastname()
+					+ " has been registered successfully !!";
+			return ResponseEntity.status(HttpStatus.OK).body(message);
 		} else {
-			return "oops something went wrong with registration service";
+			message = "Oops something went wrong with registration service";
+			return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(message);
 		}
 
 	}
@@ -112,13 +122,6 @@ public class RegistrationController {
 			return "Login Service is running !!";
 		}
 		return "Nothing";
-	}
-
-	public boolean validateInput(String username, String password) {
-		if (Strings.isBlank(username) || Strings.isBlank(password)) {
-			return false;
-		}
-		return true;
 	}
 
 	public String fallBackLoginService() {

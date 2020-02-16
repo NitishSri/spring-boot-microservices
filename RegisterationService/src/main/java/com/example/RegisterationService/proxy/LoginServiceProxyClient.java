@@ -9,9 +9,6 @@ import com.example.RegisterationService.resourceobject.SuccessReport;
 @FeignClient(name = "login-service")
 public interface LoginServiceProxyClient {
 
-	@GetMapping("/checkUserExist")
-	public SuccessReport checkUserExist(@RequestParam("username") String username);
-
 	@GetMapping("/addUser")
 	public SuccessReport addUser(@RequestParam("username") String username, @RequestParam("password") String password);
 

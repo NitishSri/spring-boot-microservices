@@ -1,7 +1,6 @@
-package com.comparer.zuulapigateway.security;
+package com.comparer.LoginService.security;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,10 +16,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.comparer.zuulapigateway.resource.UserCredentials;
-import com.comparer.zuulapigateway.service.ZuulGatewayService;
+import com.comparer.LoginService.service.DataService;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 
@@ -28,7 +25,7 @@ import io.jsonwebtoken.Jwts;
 public class AuthenticationFilter extends OncePerRequestFilter {
 
 	@Autowired
-	ZuulGatewayService service;
+	DataService service;
 
 	@Value("${jwt.signing.key}")
 	private String jwtTokenKey;
@@ -38,17 +35,17 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		SecurityUtilities instance = SecurityUtilities.getInstance();
-
 		final String requestTokenHeader = request.getHeader("Authorization");
 
 		String username = null;
-		String token = null;
+		String jwtToken = null;
+		// JWT Token is in the form "Bearer token". Remove Bearer word and get
+		// only the Token
 		if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-			token = requestTokenHeader.replace("Bearer ", "");
-			Claims claims = Jwts.parser().setSigningKey(jwtTokenKey.getBytes()).parseClaimsJws(token).getBody();
-
+			jwtToken = requestTokenHeader.substring(7);
 			try {
-				username = claims.getSubject();
+				username = Jwts.parser().setSigningKey(jwtTokenKey.getBytes()).parseClaimsJws(jwtToken).getBody()
+						.getSubject();
 			} catch (IllegalArgumentException e) {
 				System.out.println("Unable to get JWT Token");
 			} catch (ExpiredJwtException e) {
@@ -58,18 +55,22 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 			logger.warn("JWT Token does not begin with Bearer String");
 		}
 
+		// Once we get the token validate it.
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-			UserCredentials user = service.getUserDetails(username);
-			UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getUsername(),
-					user.getPassword(), new ArrayList<>());
+			UserDetails userDetails = this.service.loadUserByUsername(username);
 
-			if (instance.validateToken(token, userDetails, jwtTokenKey)) {
+			// if token is valid configure Spring Security to manually set
+			// authentication
+			if (instance.validateToken(jwtToken, userDetails, jwtTokenKey)) {
 
 				UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
 						userDetails, null, userDetails.getAuthorities());
 				usernamePasswordAuthenticationToken
 						.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				// After setting the Authentication in the context, we specify
+				// that the current user is authenticated. So it passes the
+				// Spring Security Configurations successfully.
 				SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 			}
 		}
