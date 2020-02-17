@@ -1,14 +1,12 @@
 package com.example.RegisterationService.controller;
 
-import java.util.Optional;
-
 import javax.validation.Valid;
 
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.example.RegisterationService.model.RegisterationUserInfo;
 import com.example.RegisterationService.proxy.LoginServiceProxyClient;
 import com.example.RegisterationService.repository.RegistrationRepository;
 import com.example.RegisterationService.resourceobject.RegisterationUserRequestRO;
@@ -50,6 +47,9 @@ public class RegistrationController {
 
 	@Value("${api.gateway.url}")
 	private String apiGatewayURL;
+
+	@Autowired
+	CacheManager cacheManager;
 
 	@Autowired
 	Environment environment;
@@ -131,13 +131,22 @@ public class RegistrationController {
 
 	@GetMapping("/getUserDetails")
 	public UserDetailsRO getUserDetails(String username) {
-		Optional<RegisterationUserInfo> user = registrationRepository.findByUsername(username);
-		if (user.isPresent()) {
-			return new ModelMapper().map(user.get(), UserDetailsRO.class);
-		} else {
-			return null;
-		}
+		return service.getUserDetails(username);
 
+	}
+
+	@PostMapping(path = "/update", consumes = "application/json", produces = "application/json")
+	public UserDetailsRO updateUserDetails(@RequestBody UserDetailsRO user) {
+		return service.updateUserDetails(user);
+
+	}
+
+	@GetMapping("/clearcache")
+	public String clearCache() {
+		for (String name : cacheManager.getCacheNames()) {
+			cacheManager.getCache(name).clear(); // clear cache by name
+		}
+		return "All cache has been deleted";
 	}
 
 }

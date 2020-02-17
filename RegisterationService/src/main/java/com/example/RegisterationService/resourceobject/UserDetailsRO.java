@@ -2,6 +2,7 @@ package com.example.RegisterationService.resourceobject;
 
 public class UserDetailsRO {
 
+	private Long id;
 	private String username;
 	private String firstname;
 	private String lastname;
@@ -37,6 +38,14 @@ public class UserDetailsRO {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }
