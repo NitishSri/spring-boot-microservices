@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 	CacheManager cacheManager;
 
 	@Override
+	@CacheEvict(value = "user", allEntries=true)       // It will clear cache when new user save to database
 	public RegisterationUserResponseRO saveUser(RegisterationUserRequestRO user) {
 		ModelMapper modelMapper = new ModelMapper();
 		RegisterationUserInfo userInfo = modelMapper.map(user, RegisterationUserInfo.class);
@@ -63,6 +65,19 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 		repository.save(userInfo);
 		cacheManager.getCache("user").clear();
 		return new ModelMapper().map(userInfo, UserDetailsRO.class);
+	}
+
+	@Override
+	@CacheEvict(value = "user",allEntries = true) // It will clear cache when delete any user to database
+	public String deleteUser(String username) {
+		Optional<RegisterationUserInfo> user = repository.findByUsername(username);
+		if (user.isPresent()) {
+			repository.delete(user.get());
+			return "User has been deleted";
+		} else {
+			return "No user with this username found to delete !!";
+		}
+
 	}
 
 }

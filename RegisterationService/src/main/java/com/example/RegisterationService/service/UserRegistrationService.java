@@ -13,5 +13,7 @@ public interface UserRegistrationService {
 	public UserDetailsRO getUserDetails(String username);
 	
 	public UserDetailsRO updateUserDetails(UserDetailsRO userDetails);
+	
+	public String deleteUser(String username);
 
 }

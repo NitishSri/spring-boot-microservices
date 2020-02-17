@@ -149,4 +149,9 @@ public class RegistrationController {
 		return "All cache has been deleted";
 	}
 
+	@GetMapping("/deleteUser")
+	public String deleteUser(String username) {
+		return service.deleteUser(username);
+	}
+
 }
