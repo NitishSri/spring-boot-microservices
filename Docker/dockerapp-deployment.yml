@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   labels:
+      app: dockerapp
+   name: dockerapp
+spec:
+   replicas: 2
+   selector:
+      matchLabels:
+         app: dockerapp
+   template:
+      metadata:
+         labels:
+            app: dockerapp
+      spec:
+         containers:
+         -  env:
+            -  name: RDS_HOSTNAME
+               value: mysql
+            -  name: RDS_PORT
+               value: "3306"
+            -  name: RDS_DB_NAME
+               value: root
+            -  name: RDS_USERNAME
+               value: root
+            -  name: RDS_PASSWORD
+               value: Welcome1
+            image: nitish91sri/testdockerapp:latest
+            name: dockerapp
+            ports:
+            -  containerPort: 8069

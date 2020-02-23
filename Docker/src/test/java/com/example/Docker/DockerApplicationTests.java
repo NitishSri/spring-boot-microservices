@@ -1,5 +1,6 @@
 package com.example.Docker;
 
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,6 +35,7 @@ class DockerApplicationTests {
 
 	@Test
 	void contextLoads() {
+		fail("failing test case");
 	}
 
 }
