@@ -4,7 +4,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.comparer.LoginService.model.LoginCredentials;
 
-public interface DataService extends UserDetailsService{
+public interface LoginService extends UserDetailsService{
 
 	//public LoginResponseRO checkUserExist(String username);
 

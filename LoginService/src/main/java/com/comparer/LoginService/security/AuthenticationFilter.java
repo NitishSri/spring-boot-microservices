@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.comparer.LoginService.service.DataService;
+import com.comparer.LoginService.service.LoginService;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -25,7 +25,7 @@ import io.jsonwebtoken.Jwts;
 public class AuthenticationFilter extends OncePerRequestFilter {
 
 	@Autowired
-	DataService service;
+	LoginService service;
 
 	@Value("${jwt.signing.key}")
 	private String jwtTokenKey;

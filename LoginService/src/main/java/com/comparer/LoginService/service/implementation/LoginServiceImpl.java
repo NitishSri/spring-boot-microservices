@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.comparer.LoginService.model.LoginCredentials;
 import com.comparer.LoginService.repository.LoginRepository;
-import com.comparer.LoginService.service.DataService;
+import com.comparer.LoginService.service.LoginService;
 
 @Service
-public class DataServiceImpl implements DataService   {
+public class LoginServiceImpl implements LoginService {
 
 	@Autowired
 	private LoginRepository loginRepository;
@@ -29,7 +29,7 @@ public class DataServiceImpl implements DataService   {
 	@Override
 	public boolean checkUsernameTaken(String username) {
 		UserDetails user = loadUserByUsername(username);
-		if (null!=user) {
+		if (null != user) {
 			return true;
 		} else {
 			return false;
@@ -41,7 +41,8 @@ public class DataServiceImpl implements DataService   {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Optional<LoginCredentials> credList = loginRepository.findByUsername(username);
 		if (credList.isPresent()) {
-			UserDetails user = new org.springframework.security.core.userdetails.User(credList.get().getUsername(), credList.get().getPassword(), new ArrayList<>());
+			UserDetails user = new org.springframework.security.core.userdetails.User(credList.get().getUsername(),
+					credList.get().getPassword(), new ArrayList<>());
 			return user;
 		}
 		return null;

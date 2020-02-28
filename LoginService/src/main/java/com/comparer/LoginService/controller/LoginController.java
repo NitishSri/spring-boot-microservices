@@ -30,7 +30,7 @@ import com.comparer.LoginService.resourceobject.LoginResponseRO;
 import com.comparer.LoginService.resourceobject.SuccessReport;
 import com.comparer.LoginService.resourceobject.UserDetailsRO;
 import com.comparer.LoginService.security.SecurityUtilities;
-import com.comparer.LoginService.service.DataService;
+import com.comparer.LoginService.service.LoginService;
 
 @RestController
 public class LoginController {
@@ -53,7 +53,7 @@ public class LoginController {
 	RegisterServiceProxyClient registerClient;
 
 	@Autowired
-	private DataService dataService;
+	private LoginService loginService;
 
 	@GetMapping("/status")
 	public String checkStatus() {
@@ -64,7 +64,7 @@ public class LoginController {
 	@PostMapping(path = "/login", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<UserDetailsRO> login(@Valid @RequestBody LoginRequestRO loginRO) {
 		logger.info("login api called");
-		UserDetails user = dataService.loadUserByUsername(loginRO.getUsername());
+		UserDetails user = loginService.loadUserByUsername(loginRO.getUsername());
 		HttpHeaders headers = new HttpHeaders();
 		UserDetailsRO userRO = new UserDetailsRO();
 		if (null != user && encoder.matches(loginRO.getPassword(), user.getPassword())) {
@@ -87,7 +87,7 @@ public class LoginController {
 	@GetMapping("/addUser")
 	public SuccessReport addUserCred(String username, String password) {
 		logger.info("addUser api called");
-		LoginCredentials loginUser = dataService.addUser(username, encoder.encode(password));
+		LoginCredentials loginUser = loginService.addUser(username, encoder.encode(password));
 		SuccessReport report = new SuccessReport();
 		if (loginUser != null) {
 			report.setStatusCode("USERADDED");
@@ -103,7 +103,7 @@ public class LoginController {
 
 	@GetMapping("/getUserDetails")
 	public LoginResponseRO getUserDetails(String username) {
-		UserDetails user = dataService.loadUserByUsername(username);
+		UserDetails user = loginService.loadUserByUsername(username);
 		LoginResponseRO userRO = new LoginResponseRO();
 		userRO.setUsername(user.getUsername());
 		userRO.setPassword(user.getPassword());
