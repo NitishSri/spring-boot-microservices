@@ -19,7 +19,7 @@ import com.comparer.LoginService.controller.LoginController;
 import com.comparer.LoginService.model.LoginCredentials;
 import com.comparer.LoginService.repository.LoginRepository;
 import com.comparer.LoginService.resourceobject.SuccessReport;
-import com.comparer.LoginService.service.DataService;
+import com.comparer.LoginService.service.LoginService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -32,7 +32,7 @@ class LoginServiceApplicationTests {
 	LoginCredentials loginCredentials;
 
 	@Mock
-	private DataService dataService;
+	private LoginService loginService;
 
 	@Mock
 	LoginRepository loginRepository;
@@ -65,7 +65,7 @@ class LoginServiceApplicationTests {
 	@Test
 	void checkcheckUsernameExist() throws Exception {
 		String username = "nitishsr";
-		Mockito.when(dataService.checkUsernameTaken(username)).thenReturn(true);
+		Mockito.when(loginService.checkUsernameTaken(username)).thenReturn(true);
 
 		MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/checkUserExist").param("username", username)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn();
@@ -82,7 +82,7 @@ class LoginServiceApplicationTests {
 		LoginCredentials login = new LoginCredentials();
 		login.setUsername(username);
 		login.setPassword(password);
-		Mockito.when(dataService.addUser(username, password)).thenReturn(login);
+		Mockito.when(loginService.addUser(username, password)).thenReturn(login);
 
 		MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/addUser").param("username", username)
 				.param("password", password).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn();
