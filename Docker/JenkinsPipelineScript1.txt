@@ -1,0 +1,44 @@
+pipeline {
+   agent any
+
+   stages {
+      stage('Checkout') {
+         steps {
+             echo 'Checout Build'
+             checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/NitishSri/SpringApplication']]])
+             
+         }
+      }
+      
+       stage('Run Test Case') {
+         steps {
+             script { 
+             try{
+                  echo 'Build'
+                bat """
+                def build = manager.build
+                    cd Docker
+                    mvn test
+            """.stripIndent().trim() 
+             }catch(err){
+                  step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
+                 if (currentBuild.result == 'UNSTABLE' && ((currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction.class).getFailCount() / currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction.class).getTotalCount()) * 100 ) > 50)
+                    {    println("catch")
+                 // println("TotalCount "+currentBuild.rawBuild.getAction(hudson.tasks.junit.TestResultAction.class).getTotalCount())
+                  currentBuild.result = 'FAILURE'
+                  throw err 
+                    }
+                 }
+             }
+         }  
+      }
+      stage('Run App') {
+         steps {
+	        bat """
+            cd Docker
+            docker-compose up -d
+         """.stripIndent().trim() 
+         }
+      }
+   }
+}
