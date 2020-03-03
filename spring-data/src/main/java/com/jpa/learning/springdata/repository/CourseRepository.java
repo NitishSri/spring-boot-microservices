@@ -34,7 +34,7 @@ public class CourseRepository {
 	public CourseResponse addorUpdateCourse(CourseRequest request) {
 		Course course = null != request.getId() ? em.find(Course.class, request.getId()) : null;
 		ModelMapper modelMapper = new ModelMapper();
-		modelMapper.addMappings(new PropertyMap<CourseRequest, Course>() {
+		modelMapper.addMappings(new PropertyMap<Course, CourseRequest>() {
 			@Override
 			protected void configure() {
 				skip(destination.getCreatedDate());

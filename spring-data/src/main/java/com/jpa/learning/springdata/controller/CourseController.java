@@ -27,7 +27,7 @@ public class CourseController {
 		return ResponseEntity.ok().body(service.getAllCourseDetails());
 	}
 	
-	@PostMapping(path = "/addOrUpdate", consumes = "application/json", produces = "application/json")
+	@PostMapping(path = "/addOrUpdateCourse", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<CourseResponse> addorUpdateCourse(@Valid @RequestBody CourseRequest request){
 		return ResponseEntity.ok().body(service.addorUpdateCourse(request));
 	}
