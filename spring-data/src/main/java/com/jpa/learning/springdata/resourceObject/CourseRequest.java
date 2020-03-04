@@ -1,8 +1,11 @@
 package com.jpa.learning.springdata.resourceObject;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
+
+import com.jpa.learning.springdata.model.Reviews;
 
 public class CourseRequest {
 
@@ -14,6 +17,8 @@ public class CourseRequest {
 	private LocalDateTime createdDate;
 
 	private LocalDateTime updateDate;
+
+	private List<Reviews> reviews;
 
 	public Long getId() {
 		return Id;
@@ -45,6 +50,14 @@ public class CourseRequest {
 
 	public void setUpdateDate(LocalDateTime updateDate) {
 		this.updateDate = updateDate;
+	}
+
+	public List<Reviews> getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(List<Reviews> reviews) {
+		this.reviews = reviews;
 	}
 
 }

@@ -1,17 +1,23 @@
 package com.jpa.learning.springdata.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "CourseDetails")
@@ -29,6 +35,10 @@ public class Course {
 	private LocalDateTime createdDate;
 	@UpdateTimestamp
 	private LocalDateTime updateDate;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "course")
+	@JsonIgnore
+	private List<Reviews> reviews = new ArrayList<>();
 
 	public String getName() {
 		return name;
@@ -60,6 +70,18 @@ public class Course {
 
 	public void setUpdateDate(LocalDateTime updateDate) {
 		this.updateDate = updateDate;
+	}
+
+	public List<Reviews> getReviews() {
+		return reviews;
+	}
+
+	public void addReviews(Reviews review) {
+		this.reviews.add(review);
+	}
+
+	public void removeReviews(Reviews review) {
+		this.reviews.remove(review);
 	}
 
 }

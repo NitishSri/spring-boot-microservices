@@ -1,6 +1,9 @@
 package com.jpa.learning.springdata.resourceObject;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.jpa.learning.springdata.model.Reviews;
 
 public class CourseResponse {
 
@@ -8,6 +11,7 @@ public class CourseResponse {
 	private String name;
 	private LocalDateTime createdDate;
 	private LocalDateTime updateDate;
+	private List<Reviews> reviews;
 
 	public Long getId() {
 		return Id;
@@ -39,6 +43,14 @@ public class CourseResponse {
 
 	public void setUpdateDate(LocalDateTime updateDate) {
 		this.updateDate = updateDate;
+	}
+
+	public List<Reviews> getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(List<Reviews> reviews) {
+		this.reviews = reviews;
 	}
 
 }

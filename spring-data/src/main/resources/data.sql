@@ -18,3 +18,10 @@ insert into Student(id, name, passport_id, createdDate, updateDate)
 values(20002,'Shitij', 30002, sysdate(), sysdate());
 insert into Student(id, name, passport_id, createdDate, updateDate) 
 values(20003,'Pankaj', 30003, sysdate(), sysdate());
+
+insert into Reviews(id, review, Course_id, createdDate, updateDate) 
+values(40001,'It is good', 10001, sysdate(), sysdate());
+insert into Reviews(id, review, Course_id, createdDate, updateDate) 
+values(40002,'Course was nice', 10001, sysdate(), sysdate());
+insert into Reviews(id, review, Course_id, createdDate, updateDate) 
+values(40003,'Best course ever seen', 10003, sysdate(), sysdate());
