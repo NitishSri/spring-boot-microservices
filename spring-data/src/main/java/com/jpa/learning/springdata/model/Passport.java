@@ -14,6 +14,8 @@ import javax.persistence.OneToOne;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @NamedQueries(value = { @NamedQuery(name = "get_all_passports", query = "select p from Passport p") })
 public class Passport {
@@ -22,7 +24,7 @@ public class Passport {
 	@GeneratedValue
 	private Long id;
 
-	@Column(name = "number", nullable = false)
+	@Column(nullable = false)
 	private String number;
 
 	@CreationTimestamp
@@ -30,8 +32,12 @@ public class Passport {
 	@UpdateTimestamp
 	private LocalDateTime updateDate;
 
+	@JsonIgnore
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "passport")
 	private Student student;
+
+	public Passport() {
+	}
 
 	public Long getId() {
 		return id;
@@ -63,6 +69,14 @@ public class Passport {
 
 	public void setUpdateDate(LocalDateTime updateDate) {
 		this.updateDate = updateDate;
+	}
+
+	public Student getStudent() {
+		return student;
+	}
+
+	public void setStudent(Student student) {
+		this.student = student;
 	}
 
 }

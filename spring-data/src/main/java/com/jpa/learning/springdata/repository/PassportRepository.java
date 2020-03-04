@@ -34,18 +34,10 @@ public class PassportRepository {
 	public PassportResponse addorUpdatePassport(PassportRequest request) {
 		Passport passport = null != request.getId() ? em.find(Passport.class, request.getId()) : null;
 		ModelMapper modelMapper = new ModelMapper();
-		modelMapper.addMappings(new PropertyMap<Passport, PassportRequest>() {
-			@Override
-			protected void configure() {
-				skip(destination.getCreatedDate());
-			}
-		});
 		Passport passportEntity = modelMapper.map(request, Passport.class);
-		// This means it is new passport entry so save it using persist.
 		if (Objects.isNull(passport)) {
 			em.persist(passportEntity);
 		} else {
-			// This means it is an existing entry so update it using merge.
 			em.merge(passportEntity);
 		}
 		return modelMapper.map(passportEntity, PassportResponse.class);
