@@ -37,7 +37,7 @@ public class EmailConsumerServiceImpl implements EmailConsumerService {
 	@Override
 	public EmailContent prepareEmail(ForgotPasswordRO forPassmessage) {
 		EmailContent content = new EmailContent();
-		content.setFromEmail("admin@takeaway.com");
+		content.setFromEmail("admin@abc.com");
 		content.setToEmail(forPassmessage.getEmail());
 		content.setSubject("Test Email");
 		content.setContentBody("This is a test email");
